@@ -1,14 +1,3 @@
-/*
- * PSP Software Development Kit - http://www.pspdev.org
- * -----------------------------------------------------------------------
- * Licensed under the BSD license, see LICENSE in PSPSDK root for details.
- *
- * Copyright (c) 2006 McZonk (mczonk@teamemergencyexit.com)
- *
- * Simple example for drawing text with the gu
- *
- */
-
 #include <pspkernel.h>
 #include <pspgu.h>
 #include <pspgum.h>
@@ -29,8 +18,10 @@ PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
 
 #define FONT_FILENAME "host0:/data/font.rgba"
 #define FONT_SIZE 262144
-#define LOGO_FILENAME "host0:/data/optixx_sine03.rgba"
-#define LOGO_SIZE 65536
+#define LOGO_FILENAME "host0:/data/optixx_sine04.rgba"
+#define LOGO_SIZE 262144 
+#define LOGO_WIDTH 512
+#define LOGO_HEIGHT 128
 
 
 static unsigned int __attribute__((aligned(16))) list[262144];
@@ -75,6 +66,15 @@ typedef struct {
 } stsine;
 
 stsine ssine;
+
+typedef struct {
+	int idx;
+	int idx_max;
+	int idx_step;
+	int *table;
+} ltsine;
+
+ltsine lsine;
 
 
 char * text_block =        "TEST 0"
@@ -154,10 +154,13 @@ void drawString(const char* text, int x, int y, unsigned int color, int fw) {
 	                );
 }
 
-void draw_logo() {
+void draw_logo(ltsine * lsine){
 
+	lsine->idx += lsine->idx_step;
+	if (lsine->idx >= lsine->idx_max)
+		lsine->idx-= lsine->idx_max;
+	int x = (lsine->table[lsine->idx]  / 8 );
 	VERT* v = (VERT*)sceGuGetMemory(sizeof(VERT) * 2);
-
 	VERT* v0 = &v[+0];
 	VERT* v1 = &v[1];
 
@@ -167,17 +170,17 @@ void draw_logo() {
 
 	v0->s = tx;
 	v0->t = ty;
-	v0->c = 0xFFFFFFaa;
-	v0->x = 32;
-	v0->y = 100;
-	v0->z = 0.0f;
+	v0->c = 0xFFFFFFFF;
+	v0->x = -512 + x;
+	v0->y = 90;
+	v0->z = 100.0f;
 
-	v1->s = tx + 512;
-	v1->t = ty + 32;
+	v1->t = ty + LOGO_HEIGHT;
+  v1->s = tx + LOGO_WIDTH;
 	v1->c = 0xFFFFFFFF;
-	v1->x = v0->x + 512;
-	v1->y = v0->y + 32;
-	v1->z = 0.0f;
+	v1->x = v0->x + LOGO_WIDTH;
+	v1->y = v0->y + LOGO_HEIGHT;
+	v1->z = 100.0f;
 
 
 	sceGumDrawArray(GU_SPRITES,
@@ -194,7 +197,7 @@ void init_block(tblock * block){
 	block->zoom = 0;
 }
 
-void init_sine(stsine * ssine)
+void init_ssine(stsine * ssine)
 {
 	ssine->text = text;
 	ssine->ptr = ssine->text;
@@ -207,11 +210,20 @@ void init_sine(stsine * ssine)
 	ssine->cur_w = 0;
 }
 
+void init_lsine(ltsine * lsine)
+{
+	lsine->idx = 0;
+	lsine->idx_max = 4095;
+	lsine->idx_step = 16;
+	lsine->table = sine_table;
+}
+
 int  draw_char2(VERT* v,int size, unsigned char c, int x, int y,unsigned int color)
 {
 
 
 	int idx;
+
 	c = c -32;
 	idx = c;
 	int fx  = font_face[idx].x;
@@ -376,8 +388,9 @@ int main(int argc, char** argv) {
 
 	sceCtrlSetSamplingCycle(0);
 	sceCtrlSetSamplingMode(1);
+  init_ssine(&ssine);
+  init_lsine(&lsine);
 
-	init_sine(&ssine);
 	unsigned char *tex = (unsigned char *) malloc (FONT_SIZE + LOGO_SIZE );
 	memset (tex, 0, FONT_SIZE + LOGO_SIZE );
 	SceUID fd;
@@ -459,7 +472,7 @@ int main(int argc, char** argv) {
 		drawString("Sine Scroller Demo", 0, 224, 0x7FFFFFFF, 0);
 		draw_block(&block);
 		draw_sine(&ssine);
-		draw_logo();
+		draw_logo(&lsine);
 		sceGuFinish();
 		sceGuSync(0, 0);
 		//sceKernelDelayThread (50000);

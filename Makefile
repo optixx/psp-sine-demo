@@ -1,4 +1,4 @@
-TARGET = sine03
+TARGET = sine04
 OBJS =   main.o sine.o FC.o fcplay.o LamePaula.o
 
 
@@ -12,7 +12,7 @@ LIBDIR =
 LDFLAGS =
 
 EXTRA_TARGETS = EBOOT.PBP
-PSP_EBOOT_TITLE = GUFont Sample by McZonk
+PSP_EBOOT_TITLE = Sine04
 
 PSPSDK=/usr/local/pspdev/psp/sdk
 include $(PSPSDK)/lib/build.mak
