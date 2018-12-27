@@ -428,10 +428,10 @@ int main(int argc, char** argv) {
 	sceGuShadeModel(GU_SMOOTH);
 
 
-	//sceGuEnable(GU_BLEND);
-	//sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
-	//sceGuBlendFunc(GU_ADD,GU_SRC_ALPHA,0, 0, 0);
-	//sceGuBlendFunc(GU_ADD,GU_SRC_ALPHA,GU_DST_COLOR,0,0);
+	sceGuEnable(GU_BLEND);
+	sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
+	sceGuBlendFunc(GU_ADD,GU_SRC_ALPHA,0, 0, 0);
+	sceGuBlendFunc(GU_ADD,GU_SRC_ALPHA,GU_DST_COLOR,0,0);
 
 
 	sceGuAlphaFunc(GU_GREATER,0,0xff);
