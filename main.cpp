@@ -7,17 +7,14 @@
 #include <string.h>
 #include <math.h>
 #include <stdio.h>
-
-
-#include "font.c"
 #include "fcplay.h"
 
 PSP_MODULE_INFO("Optixx Sine", 0x1000, 1, 1);
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
 
 
-#define FONT_FILENAME "host0:/data/font.rgba"
-#define FONT_SIZE 262144
+#define FONT_FILENAME "host0:/data/chunky.rgba"
+#define FONT_SIZE 196608
 #define LOGO_FILENAME "host0:/data/optixx_sine04.rgba"
 #define LOGO_SIZE 262144 
 #define LOGO_WIDTH 512
@@ -33,6 +30,7 @@ static unsigned int __attribute__((aligned(16))) list[262144];
 #define PIXEL_SIZE (4)
 #define FRAME_SIZE (BUF_WIDTH * SCR_HEIGHT * PIXEL_SIZE)
 #define ZBUF_SIZE (BUF_WIDTH SCR_HEIGHT * 2)
+#define CHAR_CNT                40
 
 typedef struct {
 	float s, t;
@@ -40,11 +38,6 @@ typedef struct {
 	float x, y, z;
 } VERT;
 
-
-
-#define CHAR_W                  24
-#define CHAR_CNT                40
-#define LINE_SPLIT              200
 
 
 char text[] = {"OPTIXX ROCKT DAS HAUS 2006 PSP DEMO  $"};
@@ -61,7 +54,6 @@ typedef struct {
 	int idx_step;
 	int *table;
 	int last_x;
-	int cur_w;
 	VERT *v;
 } stsine;
 
@@ -106,27 +98,31 @@ int CallbackThread(SceSize args, void *argp) {
 
 }
 
-void drawString(const char* text, int x, int y, unsigned int color, int fw) {
+unsigned int convert_char(unsigned int c){
+  if (c==32)
+    c = 47;
+  else if (c >=49 && c <= 57)
+    c = c - 23;
+  else if (c==48)
+    c = 35;
+  else
+    c = c - 65;
+  return c;
+}
+
+
+void draw_string(const char* text, int x, int y, unsigned int color) {
 	int len = (int)strlen(text);
-	if(!len) {
-		return;
-	}
-
 	VERT* v = (VERT*)sceGuGetMemory(sizeof(VERT) * 2 * len);
-
 	int i;
 	for(i = 0; i < len; i++) {
 		unsigned char c = (unsigned char)text[i];
-
-		int idx;
-		c = c - 32;
-		idx = c;
-		int fx  = font_face[idx].x;
-		int fy  = font_face[idx].y;
-		int fw  = font_face[idx].w;
-		int fh  = font_face[idx].h;
-		int ah  = font_ascender - fh;
-
+    c = convert_char(c);
+		int fx  = (c % 16) * 32;
+		int fy  = (c / 16) * 32;
+		int fw  = 32; 
+		int fh  = 32; 
+    printf("i=%02i c=%03i fx=%03i fy=%03i x=%03i y=%03i\n",i, c ,fx, fy, x, y);
 
 		VERT* v0 = &v[i*2+0];
 		VERT* v1 = &v[i*2+1];
@@ -135,14 +131,14 @@ void drawString(const char* text, int x, int y, unsigned int color, int fw) {
 		v0->t = (float)(fy);
 		v0->c = color;
 		v0->x = (float)(x);
-		v0->y = (float)(y + ah);
+		v0->y = (float)(y);
 		v0->z = 0.0f;
 
 		v1->s = (float)(fx + fw);
 		v1->t = (float)(fy + fh);
 		v1->c = color;
 		v1->x = (float)(x + fw);
-		v1->y = (float)(y + fh + ah);
+		v1->y = (float)(y + fh);
 		v1->z = 0.0f;
 
 		x += fw;
@@ -166,7 +162,7 @@ void draw_logo(ltsine * lsine){
 
 	int tx,ty;
 	tx = 0;
-	ty = 128;
+	ty = 96;
 
 	v0->s = tx;
 	v0->t = ty;
@@ -202,12 +198,11 @@ void init_ssine(stsine * ssine)
 	ssine->text = text;
 	ssine->ptr = ssine->text;
 	ssine->idx = 0;
-	ssine->x = CHAR_W;
+	ssine->x = 32;
 	ssine->idx_max = 4095;
 	ssine->idx_step = 64;
 	ssine->table = sine_table;
 	ssine->last_x = 0;
-	ssine->cur_w = 0;
 }
 
 void init_lsine(ltsine * lsine)
@@ -220,17 +215,11 @@ void init_lsine(ltsine * lsine)
 
 int  draw_char2(VERT* v,int size, unsigned char c, int x, int y,unsigned int color)
 {
-
-
-	int idx;
-
-	c = c -32;
-	idx = c;
-	int fx  = font_face[idx].x;
-	int fy  = font_face[idx].y;
-	int fw  = font_face[idx].w;
-	int fh  = font_face[idx].h;
-	int ah  = font_ascender - fh;
+  c = convert_char(c);
+  int fx  = (c % 16) * 32;
+  int fy  = (c / 16) * 32;
+  int fw  = 32; 
+  int fh  = 32; 
 
 
 
@@ -241,14 +230,14 @@ int  draw_char2(VERT* v,int size, unsigned char c, int x, int y,unsigned int col
 	v0->t = (float)(fy);
 	v0->c = color;
 	v0->x = (float)(x);
-	v0->y = (float)(y + ah);
+	v0->y = (float)(y);
 	v0->z = 0.0f;
 
 	v1->s = (float)(fx + fw);
 	v1->t = (float)(fy + fh);
 	v1->c = color;
 	v1->x = (float)(x + fw + size  );
-	v1->y = (float)(y + fh + ah +size);
+	v1->y = (float)(y + fh +size);
 	v1->z = 0.0f;
 	return 0;
 }
@@ -260,16 +249,14 @@ int  draw_char(VERT* v,int i, unsigned char c, int x, int y,unsigned int color)
 
 	int idx;
 	int z = 0;
-	c = c -32;
-	idx = c;
-	int fx  = font_face[idx].x;
-	int fy  = font_face[idx].y;
-	int fw  = font_face[idx].w;
-	int fh  = font_face[idx].h;
-	int ah  = font_ascender - fh;
+  c = convert_char(c);
+  int fx  = (c % 16) * 32;
+  int fy  = (c / 16) * 32;
+  int fw  = 32; 
+  int fh  = 32; 
 
+  z = y/32;
 
-	z = y/4;
 
 	VERT* v0 = &v[i*2+0];
 	VERT* v1 = &v[i*2+1];
@@ -283,14 +270,14 @@ int  draw_char(VERT* v,int i, unsigned char c, int x, int y,unsigned int color)
 	v0->t = (float)(fy);
 	v0->c = color;
 	v0->x = (float)(x);
-	v0->y = (float)(y + ah);
+	v0->y = (float)(y);
 	v0->z = 0.0f;
 
 	v1->s = (float)(fx + fw);
 	v1->t = (float)(fy + fh);
 	v1->c = color;
 	v1->x = (float)(x + fw + z);
-	v1->y = (float)(y + fh + z + ah);
+	v1->y = (float)(y + fh + z);
 	v1->z = 0.0f;
 	return (x + fw + z);
 }
@@ -336,19 +323,17 @@ void draw_sine(stsine * ssine){
 		ssine->idx=0;
 
 	ssine->x-=4;
-	if (ssine->x<= -ssine->cur_w) {
+	if (ssine->x<= -32) {
 		ssine->x=0;
 		ssine->ptr++;
 	}
 	ptr = ssine->ptr;
 	idx = ((*ptr) - 32);
-	ssine->cur_w = font_face[idx].w;
 	val = ssine->idx+(0*ssine->idx_step);
 	if (val>=ssine->idx_max)
 		val-= ssine->idx_max;
 	y = (ssine->table[ssine->idx_max-val]  / 32);
 
-	ssine->cur_w += (y/4);
 	fprintf(stderr,"O: c=%c idx=%i \n",*ptr,idx);
 
 	last_x = ssine->x;
@@ -469,7 +454,7 @@ int main(int argc, char** argv) {
 		sceGuStart(GU_DIRECT, list);
 		sceGuClear(GU_COLOR_BUFFER_BIT);
 
-		drawString("Sine Scroller Demo", 0, 224, 0x7FFFFFFF, 0);
+		draw_string("SINE SCROLLER", 0, 224, 0x7FFFFFFF);
 		draw_block(&block);
 		draw_sine(&ssine);
 		draw_logo(&lsine);

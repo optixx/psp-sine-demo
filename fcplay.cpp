@@ -36,7 +36,7 @@ audio_thread (SceSize args, void *argp)
 }
 
 
-char infile[] = "host0:/data/astaroth_3.fc13";
+char infile[] = "host0:/data/cytax-1.fc4";
 
 
 int fcplay_init(void)
