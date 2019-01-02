@@ -15,10 +15,10 @@ PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
 
 #define FONT_FILENAME "host0:/data/chunky.rgba"
 #define FONT_SIZE 196608
-#define LOGO_FILENAME "host0:/data/optixx_sine04.rgba"
-#define LOGO_SIZE 262144 
+#define LOGO_FILENAME "host0:/data/optixx.rgba"
+#define LOGO_SIZE 184320
 #define LOGO_WIDTH 512
-#define LOGO_HEIGHT 128
+#define LOGO_HEIGHT 90 
 
 
 static unsigned int __attribute__((aligned(16))) list[262144];
@@ -30,7 +30,7 @@ static unsigned int __attribute__((aligned(16))) list[262144];
 #define PIXEL_SIZE (4)
 #define FRAME_SIZE (BUF_WIDTH * SCR_HEIGHT * PIXEL_SIZE)
 #define ZBUF_SIZE (BUF_WIDTH SCR_HEIGHT * 2)
-#define CHAR_CNT                40
+#define CHAR_CNT 40
 
 typedef struct {
 	float s, t;
@@ -53,7 +53,6 @@ typedef struct {
 	int idx_max;
 	int idx_step;
 	int *table;
-	int last_x;
 	VERT *v;
 } stsine;
 
@@ -187,8 +186,8 @@ void draw_logo(ltsine * lsine){
 
 
 void init_block(tblock * block){
-	block->x = 0;
-	block->y = 0;
+	block->x = 1;
+	block->y = 1;
 	block->idx = 0;
 	block->zoom = 0;
 }
@@ -202,7 +201,6 @@ void init_ssine(stsine * ssine)
 	ssine->idx_max = 4095;
 	ssine->idx_step = 64;
 	ssine->table = sine_table;
-	ssine->last_x = 0;
 }
 
 void init_lsine(ltsine * lsine)
@@ -229,15 +227,15 @@ int  draw_char2(VERT* v,int size, unsigned char c, int x, int y,unsigned int col
 	v0->s = (float)(fx);
 	v0->t = (float)(fy);
 	v0->c = color;
-	v0->x = (float)(x);
-	v0->y = (float)(y);
+	v0->x = (float)(x) - size;
+	v0->y = (float)(y) - size;
 	v0->z = 0.0f;
 
 	v1->s = (float)(fx + fw);
 	v1->t = (float)(fy + fh);
 	v1->c = color;
-	v1->x = (float)(x + fw + size  );
-	v1->y = (float)(y + fh +size);
+	v1->x = (float)(v0->x + fw + size );
+	v1->y = (float)(v0->y + fh + size );
 	v1->z = 0.0f;
 	return 0;
 }
