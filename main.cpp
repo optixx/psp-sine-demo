@@ -68,10 +68,10 @@ typedef struct {
 ltsine lsine;
 
 
-char * text_block =        "TEST 0"
-                    "TEST 1"
-                    "TEST 2"
-                    "TEST 3";
+char * text_block = "TEST 0\n"
+                    "TEST 1\n"
+                    "TEST 2\n"
+                    "TEST 3\n";
 
 typedef struct  {
 	int nr;
@@ -189,7 +189,7 @@ void init_block(tblock * block){
 	block->x = 1;
 	block->y = 1;
 	block->idx = 0;
-	block->zoom = 0;
+	block->zoom = 32;
 }
 
 void init_ssine(stsine * ssine)
@@ -211,7 +211,7 @@ void init_lsine(ltsine * lsine)
 	lsine->table = sine_table;
 }
 
-int  draw_char2(VERT* v,int size, unsigned char c, int x, int y,unsigned int color)
+int  draw_char2(VERT* v,int i ,int size, unsigned char c, int x, int y,unsigned int color)
 {
   c = convert_char(c);
   int fx  = (c % 16) * 32;
@@ -220,9 +220,8 @@ int  draw_char2(VERT* v,int size, unsigned char c, int x, int y,unsigned int col
   int fh  = 32; 
 
 
-
-	VERT* v0 = &v[0];
-	VERT* v1 = &v[1];
+	VERT* v0 = &v[i*2+0];
+	VERT* v1 = &v[i*2+1];
 
 	v0->s = (float)(fx);
 	v0->t = (float)(fy);
@@ -234,8 +233,8 @@ int  draw_char2(VERT* v,int size, unsigned char c, int x, int y,unsigned int col
 	v1->s = (float)(fx + fw);
 	v1->t = (float)(fy + fh);
 	v1->c = color;
-	v1->x = (float)(v0->x + fw + size );
-	v1->y = (float)(v0->y + fh + size );
+	v1->x = (float)(v0->x + fw + size  * 2);
+	v1->y = (float)(v0->y + fh + size * 2 );
 	v1->z = 0.0f;
 	return 0;
 }
@@ -281,27 +280,41 @@ int  draw_char(VERT* v,int i, unsigned char c, int x, int y,unsigned int color)
 }
 
 int draw_block(tblock * block){
-
-	block->zoom++;
-	if (block->zoom > 32 ) {
-
-		block->zoom = 0;
-		block->x++;
+  int len = strlen(text_block);
+	VERT* v  = (VERT*)sceGuGetMemory(sizeof(VERT) * 2 * len);
+	block->zoom--;
+	if (block->zoom == 16 ) {
+		block->zoom = 32;
 		block->idx++;
-		if (block->idx == strlen(text_block)) {
+		if (block->idx == len) {
 			block->idx = 0;
 		}
-		if (block->x > 14 ) {
-			block->x = 0;
-			block->y++;
-		}
-
 	}
-	VERT* v  = (VERT*)sceGuGetMemory(sizeof(VERT) * 2 );
-	draw_char2(v,block->zoom,text_block[block->idx],block->x * 32, block->y * 32, 0xFFFFFFFF);
+  int x=1;
+  int y=1;
+  unsigned char c;
+  for (int i=0; i <= block->idx; i++){
+    c = text_block[i];
+    if (c=='\n'){
+      x=1;
+      y++;
+      continue;
+    }
+    x++;
+		if (x > 12 ) {
+			x = 1;
+			y++;
+    }
+    if (i < block->idx)
+      draw_char2(v,i, 0,c,x * 32, y * 32, 0xFFFFFFFF);
+    else
+      draw_char2(v,i, block->zoom,c,x * 32, y * 32, 0xFFFFFFFF);
+
+	  printf("c=%c x=%i y=%i\n",text_block[i], x*32, x*32);
+  }
 	sceGumDrawArray(GU_SPRITES,
 	                GU_TEXTURE_32BITF | GU_COLOR_8888 | GU_VERTEX_32BITF | GU_TRANSFORM_2D,
-	                1 *  2, 0, v);
+	                len *  2, 0, v);
 
 }
 
@@ -331,8 +344,6 @@ void draw_sine(stsine * ssine){
 	if (val>=ssine->idx_max)
 		val-= ssine->idx_max;
 	y = (ssine->table[ssine->idx_max-val]  / 32);
-
-	fprintf(stderr,"O: c=%c idx=%i \n",*ptr,idx);
 
 	last_x = ssine->x;
 	if (*ssine->ptr=='$')
