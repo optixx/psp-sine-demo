@@ -73,10 +73,10 @@ typedef struct
 
 LOGO_SINE logo_sine;
 
-char *text_block = "TEST 0\n"
-				   "TEST 1\n"
-				   "TEST 2\n"
-				   "TEST 3\n";
+const char *text_block = "TEST 0\n"
+						 "TEST 1\n"
+						 "TEST 2\n"
+						 "TEST 3\n";
 
 typedef struct
 {
@@ -246,8 +246,6 @@ int draw_block_char(VERT *v, int i, int size, unsigned char c, int x, int y, uns
 
 int draw_sine_char(VERT *v, int i, unsigned char c, int x, int y, unsigned int color)
 {
-
-	int idx;
 	int z = 0;
 	c = convert_char(c);
 	int fx = (c % 16) * 32;
@@ -281,7 +279,7 @@ int draw_sine_char(VERT *v, int i, unsigned char c, int x, int y, unsigned int c
 	return (x + fw + z);
 }
 
-int draw_block(TEXT_BLOCK *block)
+void draw_block(TEXT_BLOCK *block)
 {
 	int len = strlen(text_block);
 	VERT *v = (VERT *)sceGuGetMemory(sizeof(VERT) * 2 * len);
@@ -331,7 +329,6 @@ void draw_sine(SCROLLER_SINE *scroller_sine)
 	char *ptr;
 	int y;
 	int last_x;
-	int idx;
 
 	scroller_sine->v = (VERT *)sceGuGetMemory(sizeof(VERT) * 2 * CHAR_CNT);
 
@@ -346,7 +343,6 @@ void draw_sine(SCROLLER_SINE *scroller_sine)
 		scroller_sine->ptr++;
 	}
 	ptr = scroller_sine->ptr;
-	idx = ((*ptr) - 32);
 	val = scroller_sine->idx + (0 * scroller_sine->idx_step);
 	if (val >= scroller_sine->idx_max)
 		val -= scroller_sine->idx_max;
