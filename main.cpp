@@ -451,10 +451,8 @@ int main(int argc, char **argv)
 			}
 			lastpad = pad;
 		}
-
 		sceGuStart(GU_DIRECT, list);
 		sceGuClear(GU_COLOR_BUFFER_BIT);
-
 		draw_string("SINE SCROLLER", 0, 224, 0x7FFFFFFF);
 		draw_block(&block);
 		draw_sine(&scroller_sine);

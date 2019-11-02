@@ -77,7 +77,7 @@ int fcplay_start()
     mixerSetReplayingSpeed();
 
     SceUID thid;
-    thid = sceKernelCreateThread("audio_thread", audio_thread, 0x18,
+    thid = sceKernelCreateThread("audio_thread", audio_thread, 0x10,
                                  0x1000, PSP_THREAD_ATTR_USER, NULL);
     if (thid < 0)
     {
