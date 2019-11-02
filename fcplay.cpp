@@ -32,7 +32,7 @@ int audio_thread(SceSize args, void *argp)
     return 0;
 }
 
-char infile[] = "host0:/data/cytax-1.fc4";
+char infile[] = "host0:/assets/cytax-1.fc4";
 
 int fcplay_init(void)
 {
