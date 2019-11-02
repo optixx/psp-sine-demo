@@ -1,4 +1,4 @@
-TARGET = sine04
+TARGET = sine-demo
 OBJS =   main.o sine.o FC.o fcplay.o LamePaula.o
 
 INCDIR   =

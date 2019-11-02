@@ -1,7 +1,7 @@
 #ifndef LAMEPAULA_H
 #define LAMEPAULA_H
 
-#include "MyTypes.h"
+#include "mytypes.h"
 
 extern uword MIXER_patterns;
 extern uword MIXER_samples;
@@ -12,43 +12,43 @@ extern ubyte MIXER_count;
 extern uword MIXER_minPeriod;
 extern uword MIXER_maxPeriod;
 
-extern const char* mixerFormatName;
+extern const char *mixerFormatName;
 extern void (*mixerPlayRout)();
 
-extern void mixerSetBpm( uword );
+extern void mixerSetBpm(uword);
 
 struct _paula
 {
     // Paula
-    const ubyte* start;  // start address
-    uword length;        // length in 16-bit words
+    const ubyte *start; // start address
+    uword length;       // length in 16-bit words
     uword period;
-    uword volume;        // 0-64
+    uword volume; // 0-64
 };
 
 class channel
 {
- public:
+public:
     _paula paula;
-    
+
     bool isOn;
-    
-    const ubyte* start;
-    const ubyte* end;
+
+    const ubyte *start;
+    const ubyte *end;
     udword length;
-    
-    const ubyte* repeatStart;
-    const ubyte* repeatEnd;
+
+    const ubyte *repeatStart;
+    const ubyte *repeatEnd;
     udword repeatLength;
-    
+
     ubyte bitsPerSample;
     uword volume;
     uword period;
     udword sampleFrequency;
     bool sign;
-    bool looping;  // whether to loop sample buffer continously (PAULA emu)
+    bool looping; // whether to loop sample buffer continously (PAULA emu)
     ubyte panning;
-  //
+    //
     uword curPeriod;
     udword stepSpeed;
     udword stepSpeedPnt;
@@ -63,13 +63,13 @@ class channel
     {
         off();
     }
-    
+
     void on();
-    void takeNextBuf();    // take parameters from paula.* (or just to repeat.*)
-    void updatePerVol();   // period, volume
+    void takeNextBuf();  // take parameters from paula.* (or just to repeat.*)
+    void updatePerVol(); // period, volume
 };
 
-void mixerFillBuffer( void* buffer, udword bufferLen );
+void mixerFillBuffer(void *buffer, udword bufferLen);
 void mixerInit(udword freq, int bits, int channels, uword zero);
 void mixerSetReplayingSpeed();
-#endif  // LAMEPAULA_H
+#endif // LAMEPAULA_H
