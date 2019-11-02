@@ -121,7 +121,7 @@ void draw_string(const char* text, int x, int y, unsigned int color) {
 		int fy  = (c / 16) * 32;
 		int fw  = 32; 
 		int fh  = 32; 
-    printf("i=%02i c=%03i fx=%03i fy=%03i x=%03i y=%03i\n",i, c ,fx, fy, x, y);
+    //printf("i=%02i c=%03i fx=%03i fy=%03i x=%03i y=%03i\n",i, c ,fx, fy, x, y);
 
 		VERT* v0 = &v[i*2+0];
 		VERT* v1 = &v[i*2+1];
@@ -310,11 +310,11 @@ int draw_block(tblock * block){
     else
       draw_char2(v,i, block->zoom,c,x * 32, y * 32, 0xFFFFFFFF);
 
-	  printf("c=%c x=%i y=%i\n",text_block[i], x*32, x*32);
+	  //printf("c=%c x=%i y=%i\n",text_block[i], x*32, x*32);
   }
 	sceGumDrawArray(GU_SPRITES,
 	                GU_TEXTURE_32BITF | GU_COLOR_8888 | GU_VERTEX_32BITF | GU_TRANSFORM_2D,
-	                len *  2, 0, v);
+	                (block->idx+1) *  2, 0, v);
 
 }
 

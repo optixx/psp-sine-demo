@@ -1,8 +1,7 @@
 TARGET = sine04
 OBJS =   main.o sine.o FC.o fcplay.o LamePaula.o
 
-
-INCDIR    =
+INCDIR   =
 CFLAGS   = -G0 -Wall -O2 -fno-strict-aliasing
 CXXFLAGS = $(CFLAGS) -Wno-deprecated  -fno-rtti
 ASFLAGS  = $(CFLAGS)
@@ -21,3 +20,6 @@ include $(PSPSDK)/lib/build.mak
 strip: all	
 	cp sine03.elf s.elf
 	psp-strip s.elf 
+
+run: $(TARGET).elf
+	$$(PSP) $(TARGET).elf
