@@ -59,9 +59,9 @@ typedef struct
 	int idx_step;
 	int *table;
 	VERT *v;
-} stsine;
+} SCROLLER_SINE;
 
-stsine ssine;
+SCROLLER_SINE scroller_sine;
 
 typedef struct
 {
@@ -69,9 +69,9 @@ typedef struct
 	int idx_max;
 	int idx_step;
 	int *table;
-} ltsine;
+} LOGO_SINE;
 
-ltsine lsine;
+LOGO_SINE logo_sine;
 
 char *text_block = "TEST 0\n"
 				   "TEST 1\n"
@@ -85,9 +85,9 @@ typedef struct
 	int y;
 	int idx;
 	int zoom;
-} tblock;
+} TEXT_BLOCK;
 
-tblock block;
+TEXT_BLOCK block;
 
 int exit_callback(int arg1, int arg2, void *common)
 {
@@ -156,13 +156,13 @@ void draw_string(const char *text, int x, int y, unsigned int color)
 					len * 2, 0, v);
 }
 
-void draw_logo(ltsine *lsine)
+void draw_logo(LOGO_SINE *logo_sine)
 {
 
-	lsine->idx += lsine->idx_step;
-	if (lsine->idx >= lsine->idx_max)
-		lsine->idx -= lsine->idx_max;
-	int x = (lsine->table[lsine->idx] / 8);
+	logo_sine->idx += logo_sine->idx_step;
+	if (logo_sine->idx >= logo_sine->idx_max)
+		logo_sine->idx -= logo_sine->idx_max;
+	int x = (logo_sine->table[logo_sine->idx] / 8);
 	VERT *v = (VERT *)sceGuGetMemory(sizeof(VERT) * 2);
 	VERT *v0 = &v[+0];
 	VERT *v1 = &v[1];
@@ -190,7 +190,7 @@ void draw_logo(ltsine *lsine)
 					2, 0, v);
 }
 
-void init_block(tblock *block)
+void init_block(TEXT_BLOCK *block)
 {
 	block->x = 1;
 	block->y = 1;
@@ -198,23 +198,23 @@ void init_block(tblock *block)
 	block->zoom = 32;
 }
 
-void init_ssine(stsine *ssine)
+void init_ssine(SCROLLER_SINE *scroller_sine)
 {
-	ssine->text = text;
-	ssine->ptr = ssine->text;
-	ssine->idx = 0;
-	ssine->x = 32;
-	ssine->idx_max = 4095;
-	ssine->idx_step = 64;
-	ssine->table = sine_table;
+	scroller_sine->text = text;
+	scroller_sine->ptr = scroller_sine->text;
+	scroller_sine->idx = 0;
+	scroller_sine->x = 32;
+	scroller_sine->idx_max = 4095;
+	scroller_sine->idx_step = 64;
+	scroller_sine->table = sine_table;
 }
 
-void init_lsine(ltsine *lsine)
+void init_lsine(LOGO_SINE *logo_sine)
 {
-	lsine->idx = 0;
-	lsine->idx_max = 4095;
-	lsine->idx_step = 16;
-	lsine->table = sine_table;
+	logo_sine->idx = 0;
+	logo_sine->idx_max = 4095;
+	logo_sine->idx_step = 16;
+	logo_sine->table = sine_table;
 }
 
 int draw_block_char(VERT *v, int i, int size, unsigned char c, int x, int y, unsigned int color)
@@ -281,7 +281,7 @@ int draw_sine_char(VERT *v, int i, unsigned char c, int x, int y, unsigned int c
 	return (x + fw + z);
 }
 
-int draw_block(tblock *block)
+int draw_block(TEXT_BLOCK *block)
 {
 	int len = strlen(text_block);
 	VERT *v = (VERT *)sceGuGetMemory(sizeof(VERT) * 2 * len);
@@ -325,7 +325,7 @@ int draw_block(tblock *block)
 					(block->idx + 1) * 2, 0, v);
 }
 
-void draw_sine(stsine *ssine)
+void draw_sine(SCROLLER_SINE *scroller_sine)
 {
 	int i, val;
 	char *ptr;
@@ -333,46 +333,46 @@ void draw_sine(stsine *ssine)
 	int last_x;
 	int idx;
 
-	ssine->v = (VERT *)sceGuGetMemory(sizeof(VERT) * 2 * CHAR_CNT);
+	scroller_sine->v = (VERT *)sceGuGetMemory(sizeof(VERT) * 2 * CHAR_CNT);
 
-	ssine->idx += ssine->idx_step;
-	if (ssine->idx >= ssine->idx_max)
-		ssine->idx = 0;
+	scroller_sine->idx += scroller_sine->idx_step;
+	if (scroller_sine->idx >= scroller_sine->idx_max)
+		scroller_sine->idx = 0;
 
-	ssine->x -= 4;
-	if (ssine->x <= -32)
+	scroller_sine->x -= 4;
+	if (scroller_sine->x <= -32)
 	{
-		ssine->x = 0;
-		ssine->ptr++;
+		scroller_sine->x = 0;
+		scroller_sine->ptr++;
 	}
-	ptr = ssine->ptr;
+	ptr = scroller_sine->ptr;
 	idx = ((*ptr) - 32);
-	val = ssine->idx + (0 * ssine->idx_step);
-	if (val >= ssine->idx_max)
-		val -= ssine->idx_max;
-	y = (ssine->table[ssine->idx_max - val] / 32);
+	val = scroller_sine->idx + (0 * scroller_sine->idx_step);
+	if (val >= scroller_sine->idx_max)
+		val -= scroller_sine->idx_max;
+	y = (scroller_sine->table[scroller_sine->idx_max - val] / 32);
 
-	last_x = ssine->x;
-	if (*ssine->ptr == '$')
-		ssine->ptr = ssine->text;
-	ptr = ssine->ptr;
+	last_x = scroller_sine->x;
+	if (*scroller_sine->ptr == '$')
+		scroller_sine->ptr = scroller_sine->text;
+	ptr = scroller_sine->ptr;
 	for (i = 0; i < CHAR_CNT; i++)
 	{
-		val = ssine->idx + (i * ssine->idx_step);
-		if (val >= ssine->idx_max)
-			val -= ssine->idx_max;
+		val = scroller_sine->idx + (i * scroller_sine->idx_step);
+		if (val >= scroller_sine->idx_max)
+			val -= scroller_sine->idx_max;
 		if (*ptr == '$')
-			ptr = ssine->text;
+			ptr = scroller_sine->text;
 
-		y = (ssine->table[ssine->idx_max - val] / 32);
-		last_x = draw_sine_char(ssine->v, i, *ptr, last_x, y, 0xFFFFFFFF);
+		y = (scroller_sine->table[scroller_sine->idx_max - val] / 32);
+		last_x = draw_sine_char(scroller_sine->v, i, *ptr, last_x, y, 0xFFFFFFFF);
 
 		ptr++;
 	}
 
 	sceGumDrawArray(GU_SPRITES,
 					GU_TEXTURE_32BITF | GU_COLOR_8888 | GU_VERTEX_32BITF | GU_TRANSFORM_2D,
-					CHAR_CNT * 2, 0, ssine->v);
+					CHAR_CNT * 2, 0, scroller_sine->v);
 }
 
 int main(int argc, char **argv)
@@ -387,8 +387,8 @@ int main(int argc, char **argv)
 
 	sceCtrlSetSamplingCycle(0);
 	sceCtrlSetSamplingMode(1);
-	init_ssine(&ssine);
-	init_lsine(&lsine);
+	init_ssine(&scroller_sine);
+	init_lsine(&logo_sine);
 
 	unsigned char *tex = (unsigned char *)malloc(FONT_SIZE + LOGO_SIZE);
 	memset(tex, 0, FONT_SIZE + LOGO_SIZE);
@@ -418,32 +418,20 @@ int main(int argc, char **argv)
 	sceGuDepthRange(0xc350, 0x2710);
 	sceGuScissor(0, 0, SCR_WIDTH, SCR_HEIGHT);
 	sceGuEnable(GU_SCISSOR_TEST);
-
 	sceGuDisable(GU_DEPTH_TEST);
-	//sceGuDepthRange(0xc350,0x2710);
-	//sceGuEnable(GU_DEPTH_TEST);
-
 	sceGuShadeModel(GU_SMOOTH);
-
 	sceGuEnable(GU_BLEND);
 	sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
 	sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, 0, 0, 0);
 	sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_DST_COLOR, 0, 0);
-
 	sceGuAlphaFunc(GU_GREATER, 0, 0xff);
 	sceGuEnable(GU_ALPHA_TEST);
-
 	sceGuEnable(GU_TEXTURE_2D);
 	sceGuTexMode(GU_PSM_8888, 0, 0, 0);
 	sceGuTexImage(0, 512, 256, 512, tex);
-
-	//sceGuTexImage(0, 512, 512, 512, tex);
-	//sceGuTexImage(0, 256, 128, 256, tex);
-
 	sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
 	sceGuTexEnvColor(0x0);
 	sceGuTexOffset(0.0f, 0.0f);
-	//sceGuTexScale(1.0f / 256.0f, 1.0f / 128.0f);
 	sceGuTexWrap(GU_REPEAT, GU_REPEAT);
 	sceGuTexFilter(GU_NEAREST, GU_NEAREST);
 	sceGuFinish();
@@ -469,11 +457,10 @@ int main(int argc, char **argv)
 
 		draw_string("SINE SCROLLER", 0, 224, 0x7FFFFFFF);
 		draw_block(&block);
-		draw_sine(&ssine);
-		draw_logo(&lsine);
+		draw_sine(&scroller_sine);
+		draw_logo(&logo_sine);
 		sceGuFinish();
 		sceGuSync(0, 0);
-		//sceKernelDelayThread (50000);
 		sceDisplayWaitVblankStart();
 		sceGuSwapBuffers();
 	}
