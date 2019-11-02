@@ -17,7 +17,7 @@ A PSP demo using some traditional Amiga influenced demo effects.
 ```
 pspdev-docker.sh make clean all 
 ```
-4. Run elf file in a emulator e.g 
+4. Run elf in the emulator 
 ```
 /Applications/PPSSPPSDL.app/Contents/MacOS/PPSSPPSDL sine-deme.elf
 ```
