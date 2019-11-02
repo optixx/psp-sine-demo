@@ -1,4 +1,4 @@
-# PSP Sines Demo
+# PSP Sine Demo
 
 ## Overview 
 A PSP demo using some traditional Amiga influenced demo effects.
