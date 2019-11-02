@@ -10,6 +10,8 @@ A PSP demo using some traditional Amiga influenced demo effects.
 
 ![](https://github.com/optixx/psp-sine-demo/raw/master/screenshots/sine-demo1.png)
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/GUyV878LCI4" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 ## Usage
 1. Install docker image with psp toolchain
 2. Create pspdev-docker.sh script into your path
