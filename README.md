@@ -6,7 +6,7 @@ A PSP demo using some traditional Amiga influenced demo effects.
 - Sine scroller
 - Swing logo
 - Text block print
-- Future compose mod
+- Future composer music
 
 ## Usage
 1. Install docker image with psp toolchain
