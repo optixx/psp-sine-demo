@@ -8,6 +8,8 @@ A PSP demo using some traditional Amiga influenced demo effects.
 - Text block print
 - Future composer music
 
+![](https://github.com/optixx/psp-sine-demo/raw/master/screenshots/sine-demo1.png)
+
 ## Usage
 1. Install docker image with psp toolchain
 2. Create pspdev-docker.sh script into your path
