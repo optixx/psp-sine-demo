@@ -23,5 +23,5 @@ pspdev-docker.sh make clean all
 ```
 
 ## Links
-* [pspdev-docker](https://github.com/optixx/pspdev-docker) - Bbuild a docker image with the pspdev toolchain
+* [pspdev-docker](https://github.com/optixx/pspdev-docker) - Build a docker image with the pspdev toolchain
 * [ppsspp](https://www.ppsspp.org/) - A PSP emulator
