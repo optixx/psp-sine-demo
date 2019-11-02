@@ -10,6 +10,14 @@
 #include <stdio.h>
 #include "fcplay.h"
 
+#define DEBUG 0
+#define debug_print(fmt, ...)                  \
+	do                                         \
+	{                                          \
+		if (DEBUG)                             \
+			fprintf(stderr, fmt, __VA_ARGS__); \
+	} while (0)
+
 PSP_MODULE_INFO("Sine Demo", 0x1000, 1, 1);
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
 
@@ -37,7 +45,7 @@ typedef struct
 	float x, y, z;
 } VERT;
 
-char text[] = {"OPTIXX ROCKT DAS HAUS 2006 PSP DEMO  $"};
+char text[] = {"OPTIXX PSP SINE DEMO $"};
 
 extern int sine_table[];
 
@@ -121,7 +129,7 @@ void draw_string(const char *text, int x, int y, unsigned int color)
 		int fy = (c / 16) * 32;
 		int fw = 32;
 		int fh = 32;
-		//printf("i=%02i c=%03i fx=%03i fy=%03i x=%03i y=%03i\n",i, c ,fx, fy, x, y);
+		debug_print("i=%02i c=%03i fx=%03i fy=%03i x=%03i y=%03i\n", i, c, fx, fy, x, y);
 
 		VERT *v0 = &v[i * 2 + 0];
 		VERT *v1 = &v[i * 2 + 1];
@@ -209,7 +217,7 @@ void init_lsine(ltsine *lsine)
 	lsine->table = sine_table;
 }
 
-int draw_char2(VERT *v, int i, int size, unsigned char c, int x, int y, unsigned int color)
+int draw_block_char(VERT *v, int i, int size, unsigned char c, int x, int y, unsigned int color)
 {
 	c = convert_char(c);
 	int fx = (c % 16) * 32;
@@ -236,7 +244,7 @@ int draw_char2(VERT *v, int i, int size, unsigned char c, int x, int y, unsigned
 	return 0;
 }
 
-int draw_char(VERT *v, int i, unsigned char c, int x, int y, unsigned int color)
+int draw_sine_char(VERT *v, int i, unsigned char c, int x, int y, unsigned int color)
 {
 
 	int idx;
@@ -306,11 +314,11 @@ int draw_block(tblock *block)
 			y++;
 		}
 		if (i < block->idx)
-			draw_char2(v, i, 0, c, x * 32, y * 32, 0xFFFFFFFF);
+			draw_block_char(v, i, 0, c, x * 32, y * 32, 0xFFFFFFFF);
 		else
-			draw_char2(v, i, block->zoom, c, x * 32, y * 32, 0xFFFFFFFF);
+			draw_block_char(v, i, block->zoom, c, x * 32, y * 32, 0xFFFFFFFF);
 
-		//printf("c=%c x=%i y=%i\n",text_block[i], x*32, x*32);
+		debug_print("c=%c x=%i y=%i\n", text_block[i], x * 32, x * 32);
 	}
 	sceGumDrawArray(GU_SPRITES,
 					GU_TEXTURE_32BITF | GU_COLOR_8888 | GU_VERTEX_32BITF | GU_TRANSFORM_2D,
@@ -357,7 +365,7 @@ void draw_sine(stsine *ssine)
 			ptr = ssine->text;
 
 		y = (ssine->table[ssine->idx_max - val] / 32);
-		last_x = draw_char(ssine->v, i, *ptr, last_x, y, 0xFFFFFFFF);
+		last_x = draw_sine_char(ssine->v, i, *ptr, last_x, y, 0xFFFFFFFF);
 
 		ptr++;
 	}
