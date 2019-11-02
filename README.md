@@ -1,7 +1,7 @@
 # PSP Sines Demo
 
 ## Overview 
-This is PSP demo using some traditional Amiga influenced demo effects.
+A PSP demo using some traditional Amiga influenced demo effects.
 
 - Sine scroller
 - Swing logo
