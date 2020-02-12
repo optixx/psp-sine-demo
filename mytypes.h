@@ -1,7 +1,7 @@
 #ifndef MYTYPES_H
 #define MYTYPES_H
 
-#include "Config.h"
+#include "config.h"
 
 typedef signed char sbyte;
 typedef unsigned char ubyte;

@@ -1,8 +1,8 @@
 #ifndef MYENDIAN_H
 #define MYENDIAN_H
 
-#include "Config.h"
-#include "MyTypes.h"
+#include "config.h"
+#include "mytypes.h"
 
 // This should never be true.
 #if defined(LO) || defined(HI) || defined(LOLO) || defined(LOHI) || defined(HILO) || defined(HIHI)
