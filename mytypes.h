@@ -16,6 +16,6 @@ typedef unsigned char uchar;
 typedef unsigned int uint;
 typedef unsigned long int ulong;
 
-typedef void (*ptr2func)();
+typedef void (* ptr2func)();
 
 #endif

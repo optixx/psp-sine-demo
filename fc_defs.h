@@ -34,16 +34,14 @@ static const ubyte ENVELOPE_END = SEQ_END;
 static const ubyte ENVELOPE_SUSTAIN = 0xE8;
 static const ubyte ENVELOPE_SLIDE = 0xEA;
 
-struct _FC_admin
-{
+struct _FC_admin {
     uword dmaFlags; // which audio channels to turn on (AMIGA related)
     ubyte count;    // speed count
     ubyte speed;    // speed
     ubyte RScount;
     bool isEnabled; // player on => true, else false
 
-    struct _moduleOffsets
-    {
+    struct _moduleOffsets {
         udword trackTable;
         udword patterns;
         udword sndModSeqs;
@@ -56,23 +54,20 @@ struct _FC_admin
     int usedVolModSeqs;
 } FC_admin;
 
-struct FC_SOUNDinfo_internal
-{
-    const ubyte *start;
+struct FC_SOUNDinfo_internal {
+    const ubyte * start;
     uword len, repOffs, repLen;
     // rest was place-holder (6 bytes)
 };
 
-struct _FC_SOUNDinfo
-{
+struct _FC_SOUNDinfo {
     // 10 samples/sample-packs
     // 80 waveforms
     FC_SOUNDinfo_internal snd[10 + 80];
 } FC_SOUNDinfo;
 
-struct _FC_CHdata
-{
-    channel *ch; // paula and mixer interface
+struct _FC_CHdata {
+    channel * ch; // paula and mixer interface
 
     uword dmaMask;
 
@@ -108,12 +103,12 @@ struct _FC_CHdata
     ubyte sndModSustainTime;
 
     ubyte vibFlag, vibDelay, vibSpeed,
-        vibAmpl, vibCurOffs, volSlideDelayFlag;
+          vibAmpl, vibCurOffs, volSlideDelayFlag;
 
     sbyte volume;
     uword period;
 
-    const ubyte *pSampleStart;
+    const ubyte * pSampleStart;
     uword repeatOffset;
     uword repeatLength;
     uword repeatDelay;

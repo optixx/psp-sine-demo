@@ -12,15 +12,14 @@ extern ubyte MIXER_count;
 extern uword MIXER_minPeriod;
 extern uword MIXER_maxPeriod;
 
-extern const char *mixerFormatName;
-extern void (*mixerPlayRout)();
+extern const char * mixerFormatName;
+extern void (* mixerPlayRout)();
 
 extern void mixerSetBpm(uword);
 
-struct _paula
-{
+struct _paula {
     // Paula
-    const ubyte *start; // start address
+    const ubyte * start; // start address
     uword length;       // length in 16-bit words
     uword period;
     uword volume; // 0-64
@@ -29,47 +28,45 @@ struct _paula
 class channel
 {
 public:
-    _paula paula;
+_paula paula;
 
-    bool isOn;
+bool isOn;
 
-    const ubyte *start;
-    const ubyte *end;
-    udword length;
+const ubyte * start;
+const ubyte * end;
+udword length;
 
-    const ubyte *repeatStart;
-    const ubyte *repeatEnd;
-    udword repeatLength;
+const ubyte * repeatStart;
+const ubyte * repeatEnd;
+udword repeatLength;
 
-    ubyte bitsPerSample;
-    uword volume;
-    uword period;
-    udword sampleFrequency;
-    bool sign;
-    bool looping; // whether to loop sample buffer continously (PAULA emu)
-    ubyte panning;
-    //
-    uword curPeriod;
-    udword stepSpeed;
-    udword stepSpeedPnt;
-    udword stepSpeedAddPnt;
+ubyte bitsPerSample;
+uword volume;
+uword period;
+udword sampleFrequency;
+bool sign;
+bool looping;     // whether to loop sample buffer continously (PAULA emu)
+ubyte panning;
+//
+uword curPeriod;
+udword stepSpeed;
+udword stepSpeedPnt;
+udword stepSpeedAddPnt;
 
-    void off()
-    {
-        isOn = false;
-    }
+void off(){
+    isOn = false;
+}
 
-    channel()
-    {
-        off();
-    }
+channel(){
+    off();
+}
 
-    void on();
-    void takeNextBuf();  // take parameters from paula.* (or just to repeat.*)
-    void updatePerVol(); // period, volume
+void on();
+void takeNextBuf();      // take parameters from paula.* (or just to repeat.*)
+void updatePerVol();     // period, volume
 };
 
-void mixerFillBuffer(void *buffer, udword bufferLen);
+void mixerFillBuffer(void * buffer, udword bufferLen);
 void mixerInit(udword freq, int bits, int channels, uword zero);
 void mixerSetReplayingSpeed();
 #endif // LAMEPAULA_H

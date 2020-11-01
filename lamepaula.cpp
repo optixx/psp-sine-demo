@@ -19,15 +19,15 @@ uword MIXER_maxPeriod;
 
 struct channel logChannel[32];
 
-void (*mixerPlayRout)();
-const char *mixerFormatName = 0;
+void (* mixerPlayRout)();
+const char * mixerFormatName = 0;
 
-void *mixerFill8bitMono(void *, udword);
-void *mixerFill8bitStereo(void *, udword);
-void *mixerFill16bitMono(void *, udword);
-void *mixerFill16bitStereo(void *, udword);
+void * mixerFill8bitMono(void *, udword);
+void * mixerFill8bitStereo(void *, udword);
+void * mixerFill16bitMono(void *, udword);
+void * mixerFill16bitStereo(void *, udword);
 
-void *(*mixerFillRout)(void *, udword) = &mixerFill8bitMono;
+void * (* mixerFillRout)(void *, udword) = &mixerFill8bitMono;
 
 void mixerSetReplayingSpeed();
 
@@ -52,10 +52,8 @@ static udword toFill = 0;
 
 static ubyte emptySample;
 
-void channel::takeNextBuf()
-{
-    if (!isOn)
-    {
+void channel::takeNextBuf(){
+    if (!isOn) {
         // If channel is off, take sample START parameters.
         start = paula.start;
         length = paula.length;
@@ -73,65 +71,48 @@ void channel::takeNextBuf()
     repeatEnd = repeatStart + repeatLength;
 }
 
-void channel::on()
-{
+void channel::on(){
     takeNextBuf();
 
     isOn = true;
 }
 
-void channel::updatePerVol()
-{
-    if (paula.period != curPeriod)
-    {
+void channel::updatePerVol(){
+    if (paula.period != curPeriod) {
         period = paula.period; // !!!
         curPeriod = paula.period;
-        if (curPeriod != 0)
-        {
+        if (curPeriod != 0) {
             stepSpeed = (AMIGA_CLOCK / pcmFreq) / curPeriod;
             stepSpeedPnt = (((AMIGA_CLOCK / pcmFreq) % curPeriod) * 65536) / curPeriod;
-        }
-        else
-        {
+        } else {
             stepSpeed = stepSpeedPnt = 0;
         }
     }
 
     volume = paula.volume;
-    if (volume > 64)
-    {
+    if (volume > 64) {
         volume = 64;
     }
 }
 
-void mixerInit(udword freq, int bits, int channels, uword zero)
-{
+void mixerInit(udword freq, int bits, int channels, uword zero){
     pcmFreq = freq;
     bufferScale = 0;
 
-    if (bits == 8)
-    {
+    if (bits == 8) {
         zero8bit = zero;
-        if (channels == 1)
-        {
+        if (channels == 1) {
             mixerFillRout = &mixerFill8bitMono;
-        }
-        else // if (channels == 2)
-        {
+        } else { // if (channels == 2)
             mixerFillRout = &mixerFill8bitStereo;
             ++bufferScale;
         }
-    }
-    else // if (bits == 16)
-    {
+    } else { // if (bits == 16)
         zero16bit = zero;
         ++bufferScale;
-        if (channels == 1)
-        {
+        if (channels == 1) {
             mixerFillRout = &mixerFill16bitMono;
-        }
-        else // if (channels == 2)
-        {
+        } else { // if (channels == 2)
             mixerFillRout = &mixerFill16bitStereo;
             ++bufferScale;
         }
@@ -156,20 +137,17 @@ void mixerInit(udword freq, int bits, int channels, uword zero)
     // Array: 0/x, 100/x, 200/x, ..., FF00/x
     ui = 0;
     si = 0;
-    while (si < 128 * 256)
-    {
+    while (si < 128 * 256) {
         mix16[ui++] = (sword)(si / voicesPerChannel);
         si += 256;
     }
     si = -128 * 256;
-    while (si < 0)
-    {
+    while (si < 0) {
         mix16[ui++] = (sword)(si / voicesPerChannel);
         si += 256;
     }
 
-    for (int i = 0; i < 32; i++)
-    {
+    for (int i = 0; i < 32; i++) {
         logChannel[i].start = &emptySample;
         logChannel[i].end = &emptySample + 1;
         logChannel[i].repeatStart = &emptySample;
@@ -184,49 +162,38 @@ void mixerInit(udword freq, int bits, int channels, uword zero)
     }
 
     mixerSetReplayingSpeed();
-}
+} // mixerInit
 
-void mixerFillBuffer(void *buffer, udword bufferLen)
-{
+void mixerFillBuffer(void * buffer, udword bufferLen){
     // Both, 16-bit and stereo samples take more memory.
     // Hence fewer samples fit into the buffer.
     bufferLen >>= bufferScale;
 
-    while (bufferLen > 0)
-    {
-        if (toFill > bufferLen)
-        {
+    while (bufferLen > 0) {
+        if (toFill > bufferLen) {
             buffer = (*mixerFillRout)(buffer, bufferLen);
             toFill -= bufferLen;
             bufferLen = 0;
-        }
-        else if (toFill > 0)
-        {
+        } else if (toFill > 0) {
             buffer = (*mixerFillRout)(buffer, toFill);
             bufferLen -= toFill;
             toFill = 0;
         }
 
-        if (toFill == 0)
-        {
+        if (toFill == 0) {
             (*mixerPlayRout)();
 
             register udword temp = (samplesAdd += samplesPnt);
             samplesAdd = temp & 0xFFFF;
             toFill = samples + (temp > 65535);
 
-            for (int i = 0; i < MIXER_voices; i++)
-            {
-                if (logChannel[i].period != logChannel[i].curPeriod)
-                {
+            for (int i = 0; i < MIXER_voices; i++) {
+                if (logChannel[i].period != logChannel[i].curPeriod) {
                     logChannel[i].curPeriod = logChannel[i].period;
-                    if (logChannel[i].curPeriod != 0)
-                    {
+                    if (logChannel[i].curPeriod != 0) {
                         logChannel[i].stepSpeed = (AMIGA_CLOCK / pcmFreq) / logChannel[i].period;
                         logChannel[i].stepSpeedPnt = (((AMIGA_CLOCK / pcmFreq) % logChannel[i].period) * 65536) / logChannel[i].period;
-                    }
-                    else
-                    {
+                    } else {
                         logChannel[i].stepSpeed = logChannel[i].stepSpeedPnt = 0;
                     }
                 }
@@ -234,51 +201,42 @@ void mixerFillBuffer(void *buffer, udword bufferLen)
         }
 
     } // while bufferLen
-}
+} // mixerFillBuffer
 
-void mixerSetReplayingSpeed()
-{
+void mixerSetReplayingSpeed(){
     samples = (samplesOrg = pcmFreq / 50);
     samplesPnt = ((pcmFreq % 50) * 65536) / 50;
     samplesAdd = 0;
 }
 
-void mixerSetBpm(uword bpm)
-{
+void mixerSetBpm(uword bpm){
     uword callsPerSecond = (bpm * 2) / 5;
+
     samples = (samplesOrg = pcmFreq / callsPerSecond);
     samplesPnt = ((pcmFreq % callsPerSecond) * 65536) / callsPerSecond;
     samplesAdd = 0;
 }
 
-void *mixerFill8bitMono(void *buffer, udword numberOfSamples)
-{
-    ubyte *buffer8bit = (ubyte *)buffer;
-    for (int i = 0; i < MIXER_voices; i++)
-    {
+void * mixerFill8bitMono(void * buffer, udword numberOfSamples){
+    ubyte * buffer8bit = (ubyte *)buffer;
+
+    for (int i = 0; i < MIXER_voices; i++) {
         buffer8bit = (ubyte *)buffer;
 
-        for (udword n = numberOfSamples; n > 0; n--)
-        {
-            if (i == 0)
-            {
+        for (udword n = numberOfSamples; n > 0; n--) {
+            if (i == 0) {
                 *buffer8bit = zero8bit;
             }
             logChannel[i].stepSpeedAddPnt += logChannel[i].stepSpeedPnt;
             logChannel[i].start += (logChannel[i].stepSpeed + (logChannel[i].stepSpeedAddPnt > 65535));
             logChannel[i].stepSpeedAddPnt &= 65535;
-            if (logChannel[i].start < logChannel[i].end)
-            {
+            if (logChannel[i].start < logChannel[i].end) {
                 *buffer8bit += (logChannel[i].volume * mix8[*logChannel[i].start]) >> 6;
-            }
-            else
-            {
-                if (logChannel[i].looping)
-                {
+            } else {
+                if (logChannel[i].looping) {
                     logChannel[i].start = logChannel[i].repeatStart;
                     logChannel[i].end = logChannel[i].repeatEnd;
-                    if (logChannel[i].start < logChannel[i].end)
-                    {
+                    if (logChannel[i].start < logChannel[i].end) {
                         *buffer8bit += (logChannel[i].volume * mix8[*logChannel[i].start]) >> 6;
                     }
                 }
@@ -287,36 +245,28 @@ void *mixerFill8bitMono(void *buffer, udword numberOfSamples)
         }
     }
     return (buffer8bit);
-}
+} // mixerFill8bitMono
 
-void *mixerFill8bitStereo(void *buffer, udword numberOfSamples)
-{
-    ubyte *buffer8bit = (ubyte *)buffer;
-    for (int i = 1; i < MIXER_voices; i += 2)
-    {
+void * mixerFill8bitStereo(void * buffer, udword numberOfSamples){
+    ubyte * buffer8bit = (ubyte *)buffer;
+
+    for (int i = 1; i < MIXER_voices; i += 2) {
         buffer8bit = ((ubyte *)buffer) + 1;
 
-        for (udword n = numberOfSamples; n > 0; n--)
-        {
-            if (i == 1)
-            {
+        for (udword n = numberOfSamples; n > 0; n--) {
+            if (i == 1) {
                 *buffer8bit = zero8bit;
             }
             logChannel[i].stepSpeedAddPnt += logChannel[i].stepSpeedPnt;
             logChannel[i].start += (logChannel[i].stepSpeed + (logChannel[i].stepSpeedAddPnt > 65535));
             logChannel[i].stepSpeedAddPnt &= 65535;
-            if (logChannel[i].start < logChannel[i].end)
-            {
+            if (logChannel[i].start < logChannel[i].end) {
                 *buffer8bit += (logChannel[i].volume * mix8[*logChannel[i].start]) >> 6;
-            }
-            else
-            {
-                if (logChannel[i].looping)
-                {
+            } else {
+                if (logChannel[i].looping) {
                     logChannel[i].start = logChannel[i].repeatStart;
                     logChannel[i].end = logChannel[i].repeatEnd;
-                    if (logChannel[i].start < logChannel[i].end)
-                    {
+                    if (logChannel[i].start < logChannel[i].end) {
                         *buffer8bit += (logChannel[i].volume * mix8[*logChannel[i].start]) >> 6;
                     }
                 }
@@ -324,31 +274,23 @@ void *mixerFill8bitStereo(void *buffer, udword numberOfSamples)
             buffer8bit += 2;
         }
     }
-    for (int i = 0; i < MIXER_voices; i += 2)
-    {
+    for (int i = 0; i < MIXER_voices; i += 2) {
         buffer8bit = (ubyte *)buffer;
 
-        for (udword n = numberOfSamples; n > 0; n--)
-        {
-            if (i == 0)
-            {
+        for (udword n = numberOfSamples; n > 0; n--) {
+            if (i == 0) {
                 *buffer8bit = zero8bit;
             }
             logChannel[i].stepSpeedAddPnt += logChannel[i].stepSpeedPnt;
             logChannel[i].start += (logChannel[i].stepSpeed + (logChannel[i].stepSpeedAddPnt > 65535));
             logChannel[i].stepSpeedAddPnt &= 65535;
-            if (logChannel[i].start < logChannel[i].end)
-            {
+            if (logChannel[i].start < logChannel[i].end) {
                 *buffer8bit += (logChannel[i].volume * mix8[*logChannel[i].start]) >> 6;
-            }
-            else
-            {
-                if (logChannel[i].looping)
-                {
+            } else {
+                if (logChannel[i].looping) {
                     logChannel[i].start = logChannel[i].repeatStart;
                     logChannel[i].end = logChannel[i].repeatEnd;
-                    if (logChannel[i].start < logChannel[i].end)
-                    {
+                    if (logChannel[i].start < logChannel[i].end) {
                         *buffer8bit += (logChannel[i].volume * mix8[*logChannel[i].start]) >> 6;
                     }
                 }
@@ -357,36 +299,28 @@ void *mixerFill8bitStereo(void *buffer, udword numberOfSamples)
         }
     }
     return (buffer8bit);
-}
+} // mixerFill8bitStereo
 
-void *mixerFill16bitMono(void *buffer, udword numberOfSamples)
-{
-    sword *buffer16bit = (sword *)buffer;
-    for (int i = 0; i < MIXER_voices; i++)
-    {
+void * mixerFill16bitMono(void * buffer, udword numberOfSamples){
+    sword * buffer16bit = (sword *)buffer;
+
+    for (int i = 0; i < MIXER_voices; i++) {
         buffer16bit = (sword *)buffer;
 
-        for (udword n = numberOfSamples; n > 0; n--)
-        {
-            if (i == 0)
-            {
+        for (udword n = numberOfSamples; n > 0; n--) {
+            if (i == 0) {
                 *buffer16bit = zero16bit;
             }
             logChannel[i].stepSpeedAddPnt += logChannel[i].stepSpeedPnt;
             logChannel[i].start += (logChannel[i].stepSpeed + (logChannel[i].stepSpeedAddPnt > 65535));
             logChannel[i].stepSpeedAddPnt &= 65535;
-            if (logChannel[i].start < logChannel[i].end)
-            {
+            if (logChannel[i].start < logChannel[i].end) {
                 *buffer16bit += (logChannel[i].volume * mix16[*logChannel[i].start]) >> 6;
-            }
-            else
-            {
-                if (logChannel[i].looping)
-                {
+            } else {
+                if (logChannel[i].looping) {
                     logChannel[i].start = logChannel[i].repeatStart;
                     logChannel[i].end = logChannel[i].repeatEnd;
-                    if (logChannel[i].start < logChannel[i].end)
-                    {
+                    if (logChannel[i].start < logChannel[i].end) {
                         *buffer16bit += (logChannel[i].volume * mix16[*logChannel[i].start]) >> 6;
                     }
                 }
@@ -395,36 +329,28 @@ void *mixerFill16bitMono(void *buffer, udword numberOfSamples)
         }
     }
     return (buffer16bit);
-}
+} // mixerFill16bitMono
 
-void *mixerFill16bitStereo(void *buffer, udword numberOfSamples)
-{
-    sword *buffer16bit = (sword *)buffer;
-    for (int i = 1; i < MIXER_voices; i += 2)
-    {
+void * mixerFill16bitStereo(void * buffer, udword numberOfSamples){
+    sword * buffer16bit = (sword *)buffer;
+
+    for (int i = 1; i < MIXER_voices; i += 2) {
         buffer16bit = ((sword *)buffer) + 1;
 
-        for (udword n = numberOfSamples; n > 0; n--)
-        {
-            if (i == 1)
-            {
+        for (udword n = numberOfSamples; n > 0; n--) {
+            if (i == 1) {
                 *buffer16bit = zero16bit;
             }
             logChannel[i].stepSpeedAddPnt += logChannel[i].stepSpeedPnt;
             logChannel[i].start += (logChannel[i].stepSpeed + (logChannel[i].stepSpeedAddPnt > 65535));
             logChannel[i].stepSpeedAddPnt &= 65535;
-            if (logChannel[i].start < logChannel[i].end)
-            {
+            if (logChannel[i].start < logChannel[i].end) {
                 *buffer16bit += (logChannel[i].volume * mix16[*logChannel[i].start]) >> 6;
-            }
-            else
-            {
-                if (logChannel[i].looping)
-                {
+            } else {
+                if (logChannel[i].looping) {
                     logChannel[i].start = logChannel[i].repeatStart;
                     logChannel[i].end = logChannel[i].repeatEnd;
-                    if (logChannel[i].start < logChannel[i].end)
-                    {
+                    if (logChannel[i].start < logChannel[i].end) {
                         *buffer16bit += (logChannel[i].volume * mix16[*logChannel[i].start]) >> 6;
                     }
                 }
@@ -432,31 +358,23 @@ void *mixerFill16bitStereo(void *buffer, udword numberOfSamples)
             buffer16bit += 2;
         }
     }
-    for (int i = 0; i < MIXER_voices; i += 2)
-    {
+    for (int i = 0; i < MIXER_voices; i += 2) {
         buffer16bit = (sword *)buffer;
 
-        for (udword n = numberOfSamples; n > 0; n--)
-        {
-            if (i == 0)
-            {
+        for (udword n = numberOfSamples; n > 0; n--) {
+            if (i == 0) {
                 *buffer16bit = zero16bit;
             }
             logChannel[i].stepSpeedAddPnt += logChannel[i].stepSpeedPnt;
             logChannel[i].start += (logChannel[i].stepSpeed + (logChannel[i].stepSpeedAddPnt > 65535));
             logChannel[i].stepSpeedAddPnt &= 65535;
-            if (logChannel[i].start < logChannel[i].end)
-            {
+            if (logChannel[i].start < logChannel[i].end) {
                 *buffer16bit += (logChannel[i].volume * mix16[*logChannel[i].start]) >> 6;
-            }
-            else
-            {
-                if (logChannel[i].looping)
-                {
+            } else {
+                if (logChannel[i].looping) {
                     logChannel[i].start = logChannel[i].repeatStart;
                     logChannel[i].end = logChannel[i].repeatEnd;
-                    if (logChannel[i].start < logChannel[i].end)
-                    {
+                    if (logChannel[i].start < logChannel[i].end) {
                         *buffer16bit += (logChannel[i].volume * mix16[*logChannel[i].start]) >> 6;
                     }
                 }
@@ -465,4 +383,4 @@ void *mixerFill16bitStereo(void *buffer, udword numberOfSamples)
         }
     }
     return (buffer16bit);
-}
+} // mixerFill16bitStereo
